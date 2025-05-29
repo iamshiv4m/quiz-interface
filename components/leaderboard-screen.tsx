@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Trophy,
   Medal,
@@ -24,6 +24,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { API_ENDPOINTS } from "@/lib/api-configs";
+import apiClient from "@/lib/api-client";
+import { formatLeaderboardResponse } from "@/lib/utils";
+
+interface LeaderboardApiItem {
+  userId: string;
+  userName: string;
+  totalScore: number;
+  averageScore: number;
+  attemptCount: number;
+  sessionId: string[];
+  scores: number[];
+}
+
+interface MatchApiItem {
+  sessionId: string;
+  userId: string;
+  userName: string;
+  score: number;
+}
+
+interface ApiResponseData {
+  overall: LeaderboardApiItem[];
+  match1: MatchApiItem[];
+  match2: MatchApiItem[];
+  match3: MatchApiItem[];
+  // …add more matches if your backend returns them
+}
 
 interface LeaderboardData {
   rank: number;
@@ -59,6 +87,7 @@ interface LeaderboardScreenProps {
   userRank: number;
   onBack: () => void;
   onReattempt: () => void;
+  videoId: string;
 }
 
 const gameTagConfig = {
@@ -95,10 +124,34 @@ export default function LeaderboardScreen({
   userRank,
   onBack,
   onReattempt,
+  videoId,
 }: LeaderboardScreenProps) {
   const [selectedMatch, setSelectedMatch] = useState("match1");
   const [expandedLeaderboard, setExpandedLeaderboard] = useState(false);
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
+  const [overall, setOverall] = useState<any>(null);
+  const [apiData, setApiData] = useState<any | null>(null);
+
+  // 1) Fetch once on mount
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await apiClient.get<{
+          success: boolean;
+          data: ApiResponseData;
+        }>(API_ENDPOINTS.LEADERBOARD.GENERATE_LEADERBOARD(videoId));
+        console.log("res: ", res);
+        if (res.data && res.success) {
+          const nicelyShaped = formatLeaderboardResponse(res);
+          console.log("nicelyShaped: ", nicelyShaped);
+          setApiData(nicelyShaped);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetch();
+  }, [videoId]);
 
   // Enhanced mock data with gaming tags
   const fullLeaderboard: LeaderboardData[] = [

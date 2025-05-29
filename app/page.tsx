@@ -5,8 +5,14 @@ import HomeScreenWidget from "@/components/home-screen-widget";
 import AdaptiveQuiz from "@/components/adaptive-quiz";
 import ResultsScreen from "@/components/results-screen";
 import LeaderboardScreen from "@/components/leaderboard-screen";
+import OverviewLeaderboard from "@/components/overview-leaderboard";
 
-type Screen = "home" | "quiz" | "results" | "leaderboard";
+type Screen =
+  | "home"
+  | "quiz"
+  | "results"
+  | "leaderboard"
+  | "overview-leaderboard";
 
 interface QuizResult {
   score: number;
@@ -35,7 +41,7 @@ export default function Page() {
   };
 
   const handleNavigateToLeaderboard = () => {
-    setCurrentScreen("leaderboard");
+    setCurrentScreen("overview-leaderboard");
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -88,6 +94,8 @@ export default function Page() {
       <AdaptiveQuiz
         onComplete={handleQuizComplete}
         previousScore={previousScore}
+        userId="6838182cb05c7eeec49e0f32"
+        videoId="68382e00ea95a664aaef9853"
       />
     );
   }
@@ -109,10 +117,22 @@ export default function Page() {
   if (currentScreen === "leaderboard") {
     return (
       <LeaderboardScreen
+        // userId="6838182cb05c7eeec49e0f32"
         userScore={80}
         userRank={6}
         onBack={handleBackToResults}
         onReattempt={handleRestart}
+        videoId="68382e00ea95a664aaef9853"
+      />
+    );
+  }
+
+  if (currentScreen === "overview-leaderboard") {
+    return (
+      <OverviewLeaderboard
+        onStartQuiz={handleAttemptMatch}
+        onViewDetailedLeaderboard={handleViewLeaderboard}
+        onBack={handleBackToHome}
       />
     );
   }

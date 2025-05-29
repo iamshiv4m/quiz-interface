@@ -1,61 +1,83 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import DashboardWidget from "../../components/dashboard-widget"
-import AdaptiveQuiz from "../../components/adaptive-quiz"
-import ResultsScreen from "../../components/results-screen"
-import LeaderboardScreen from "../../components/leaderboard-screen"
+import { useState } from "react";
+import DashboardWidget from "../../components/dashboard-widget";
+import AdaptiveQuiz from "../../components/adaptive-quiz";
+import ResultsScreen from "../../components/results-screen";
+import LeaderboardScreen from "../../components/leaderboard-screen";
+import OverviewLeaderboard from "../../components/overview-leaderboard";
 
-type Screen = "dashboard" | "quiz" | "results" | "leaderboard"
+type Screen =
+  | "dashboard"
+  | "quiz"
+  | "results"
+  | "leaderboard"
+  | "overview-leaderboard";
 
 interface QuizResult {
-  score: number
-  maxScore: number
-  difficulties: ("E" | "M" | "H")[]
-  finalScore: number
-  previousScore?: number
+  score: number;
+  maxScore: number;
+  difficulties: ("E" | "M" | "H")[];
+  finalScore: number;
+  previousScore?: number;
 }
 
 export default function DashboardPage() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard")
-  const [quizResult, setQuizResult] = useState<QuizResult | null>(null)
-  const [previousScore, setPreviousScore] = useState<number | undefined>(undefined)
+  const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
+  const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [previousScore, setPreviousScore] = useState<number | undefined>(
+    undefined
+  );
 
   const handleNavigateToQuiz = () => {
-    setCurrentScreen("quiz")
-  }
+    setCurrentScreen("quiz");
+  };
 
   const handleQuizComplete = (result: QuizResult) => {
-    setQuizResult(result)
-    setCurrentScreen("results")
-  }
+    setQuizResult(result);
+    setCurrentScreen("results");
+  };
 
   const handleRestart = () => {
     if (quizResult) {
-      setPreviousScore(quizResult.finalScore)
+      setPreviousScore(quizResult.finalScore);
     }
-    setQuizResult(null)
-    setCurrentScreen("quiz")
-  }
+    setQuizResult(null);
+    setCurrentScreen("quiz");
+  };
 
   const handleViewLeaderboard = () => {
-    setCurrentScreen("leaderboard")
-  }
+    setCurrentScreen("overview-leaderboard");
+  };
 
   const handleBackToResults = () => {
-    setCurrentScreen("results")
-  }
+    setCurrentScreen("results");
+  };
 
   const handleBackToDashboard = () => {
-    setCurrentScreen("dashboard")
-  }
+    setCurrentScreen("dashboard");
+  };
+
+  const handleAttemptMatch = (matchId: string) => {
+    setCurrentScreen("quiz");
+  };
 
   if (currentScreen === "dashboard") {
-    return <DashboardWidget onNavigateToQuiz={handleNavigateToQuiz} />
+    return (
+      <DashboardWidget
+        onNavigateToQuiz={handleNavigateToQuiz}
+        onNavigateToLeaderboard={handleViewLeaderboard}
+      />
+    );
   }
 
   if (currentScreen === "quiz") {
-    return <AdaptiveQuiz onComplete={handleQuizComplete} previousScore={previousScore} />
+    return (
+      <AdaptiveQuiz
+        onComplete={handleQuizComplete}
+        previousScore={previousScore}
+      />
+    );
   }
 
   if (currentScreen === "results" && quizResult) {
@@ -69,7 +91,7 @@ export default function DashboardPage() {
         onRestart={handleRestart}
         onViewLeaderboard={handleViewLeaderboard}
       />
-    )
+    );
   }
 
   if (currentScreen === "leaderboard" && quizResult) {
@@ -80,8 +102,18 @@ export default function DashboardPage() {
         onBack={handleBackToResults}
         onReattempt={handleRestart}
       />
-    )
+    );
   }
 
-  return null
+  if (currentScreen === "overview-leaderboard") {
+    return (
+      <OverviewLeaderboard
+        onStartQuiz={handleAttemptMatch}
+        onViewDetailedLeaderboard={handleViewLeaderboard}
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
+  return null;
 }
